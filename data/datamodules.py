@@ -4,6 +4,8 @@ from torchvision import transforms
 from utils import get_project_root
 from typing import Optional
 from torch.utils.data import random_split
+import matplotlib
+matplotlib.use('TkAgg')
 
 downloaded_data_path = get_project_root() / "data" / "downloaded" 
 
@@ -34,7 +36,6 @@ class MNISTDataModule(pl.LightningDataModule):
             self.test_set = vision_datasets.MNIST(self.path, train=False, transform=self.transform)
         if stage == "predict" or stage is None:
             self.predict_set = vision_datasets.MNIST(self.path, train=False, transform=self.transform)
-
 
 
 data = MNISTDataModule()
