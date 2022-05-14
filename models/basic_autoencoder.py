@@ -21,8 +21,8 @@ class Encoder(torch.nn.Module):
             torch.nn.Linear(3136, 2),
             )
     def forward(self, input):
-        output = self.encoding_block(input)
-        print(output.shape)
+        latent = self.encoding_block(input)
+        return latent
 
 class Decoder(torch.nn.Module):
     def __init__(self):
@@ -33,15 +33,20 @@ class Decoder(torch.nn.Module):
             torch.nn.ConvTranspose2d(64, 64, (3, 3), stride=(1, 1), padding=1),
             torch.nn.BatchNorm2d(64),
             torch.nn.ReLU(),
-            torch.nn.ConvTranspose2d(64, 64, (3, 3), stride=(2, 2), padding=1),
+            torch.nn.ConvTranspose2d(64, 64, (3, 3), stride=(2, 2), padding=1, output_padding=1),
+            torch.nn.BatchNorm2d(64),
+            torch.nn.ReLU(),
+            torch.nn.ConvTranspose2d(64, 64, (3, 3), stride=(2, 2), padding=1, output_padding=1),
+            torch.nn.BatchNorm2d(64),
+            torch.nn.ReLU(),
+            torch.nn.ConvTranspose2d(64, 64, (3, 3), stride=(1, 1), padding=1),
             torch.nn.BatchNorm2d(64),
             torch.nn.ReLU(),
         )
     def forward(self, input):
-        output = self.decoding_block(input)
-        print(output.shape)
+        reconstructed = self.decoding_block(input)
+        return reconstructed
 
 
 decoder = Decoder()
-
 decoder(torch.rand((1, 2)))
