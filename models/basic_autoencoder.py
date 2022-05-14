@@ -1,7 +1,7 @@
 import pytorch_lightning as pl
 import torch
 
-class Encoder(pl.LightningModule):
+class Encoder(torch.nn.Module):
     def __init__(self):
         super().__init__()
         self.encoding_block = torch.nn.Sequential(
@@ -24,7 +24,7 @@ class Encoder(pl.LightningModule):
         output = self.encoding_block(input)
         print(output.shape)
 
-class Decoder(pl.LightningModule):
+class Decoder(torch.nn.Module):
     def __init__(self):
         super().__init__()
         self.decoding_block = torch.nn.Sequential(
