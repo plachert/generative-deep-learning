@@ -3,7 +3,7 @@ import torchvision.datasets as vision_datasets
 from torchvision import transforms
 from utils import get_project_root
 from typing import Optional
-from torch.utils.data import random_split
+from torch.utils.data import random_split, DataLoader
 import matplotlib
 matplotlib.use('TkAgg')
 
@@ -19,6 +19,7 @@ class MNISTDataModule(pl.LightningDataModule):
         train_batch_size=32, 
         val_batch_size=32,
         ):
+        super().__init__()
         self.train_batch_size = train_batch_size
         self.val_batch_size = val_batch_size
         self.test_batch_size = 1
@@ -37,12 +38,16 @@ class MNISTDataModule(pl.LightningDataModule):
         if stage == "predict" or stage is None:
             self.predict_set = vision_datasets.MNIST(self.path, train=False, transform=self.transform)
 
+    def train_dataloader(self):
+        return DataLoader(self.train_set, batch_size=self.train_batch_size, num_workers=8)
 
-data = MNISTDataModule()
-data.prepare_data()
-data.setup()
-x, y  = data.train_set[0]
-import matplotlib.pyplot as plt
-import numpy as np
-plt.imshow(np.squeeze(x.numpy()))
-plt.show()
+
+if __name__ == "__main__":
+    data = MNISTDataModule()
+    data.prepare_data()
+    data.setup()
+    x, y  = data.train_set[0]
+    import matplotlib.pyplot as plt
+    import numpy as np
+    plt.imshow(np.squeeze(x.numpy()))
+    plt.show()

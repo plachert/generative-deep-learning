@@ -1,6 +1,7 @@
 import pytorch_lightning as pl
 import torch
 
+
 class Encoder(torch.nn.Module):
     def __init__(self):
         super().__init__()
@@ -24,6 +25,7 @@ class Encoder(torch.nn.Module):
         latent = self.encoding_block(input)
         return latent
 
+
 class Decoder(torch.nn.Module):
     def __init__(self):
         super().__init__()
@@ -46,6 +48,37 @@ class Decoder(torch.nn.Module):
     def forward(self, input):
         reconstructed = self.decoding_block(input)
         return reconstructed
+
+
+class AutoEncoderSystem(pl.LightningModule):
+    def __init__(
+        self,
+        encoder,
+        decoder,
+        learning_rate=0.001,
+    ):
+        super().__init__()
+        self.encoder = encoder
+        self.decoder = decoder
+        self.learning_rate = learning_rate
+        self.loss = torch.nn.MSELoss()
+    
+    def forward(self, image):
+        latent = self.encoder(image)
+        return latent
+
+    def training_step(self, batch, batch_idx):
+        image, _ = batch
+        latent = self(image)
+        reconstructed = self.decoder(latent)
+        loss = torch.sqrt(self.loss(image, reconstructed))
+        return loss
+
+    def configure_optimizers(self):
+        return torch.optim.Adam(self.parameters(), self.learning_rate)
+
+
+    
 
 
 decoder = Decoder()
