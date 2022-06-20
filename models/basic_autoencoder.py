@@ -63,10 +63,26 @@ class AutoEncoderSystem(pl.LightningModule):
         self.decoder = decoder
         self.learning_rate = learning_rate
         self.loss = torch.nn.MSELoss()
+        self.unreduced_loss = torch.nn.MSELoss(reduction="none")
     
     def forward(self, image):
         latent = self.encoder(image)
         return latent
+
+    def validation_step(self, batch, batch_idx):
+        image, _ = batch
+        latent = self(image)
+        reconstructed = self.decoder(latent)
+        unreduced_loss = torch.sqrt(torch.mean(self.unreduced_loss(image, reconstructed), dim=(-1, -2))) # reduce spatial dims only
+        loss = torch.sqrt(self.loss(image, reconstructed))
+        output_dict = {
+            "image": image.detach(),
+            "val_unreduced_loss": unreduced_loss.detach(),
+            "val_loss": loss.detach(),
+            "reconstructed": reconstructed.detach(),
+            "latent": latent.detach(),
+        }
+        return output_dict
 
     def training_step(self, batch, batch_idx):
         image, _ = batch

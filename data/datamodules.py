@@ -5,7 +5,6 @@ from utils import get_project_root
 from typing import Optional
 from torch.utils.data import random_split, DataLoader
 import matplotlib
-matplotlib.use('TkAgg')
 
 downloaded_data_path = get_project_root() / "data" / "downloaded" 
 
@@ -40,6 +39,9 @@ class MNISTDataModule(pl.LightningDataModule):
 
     def train_dataloader(self):
         return DataLoader(self.train_set, batch_size=self.train_batch_size, num_workers=8)
+    
+    def val_dataloader(self):
+        return DataLoader(self.val_set, batch_size=self.val_batch_size, num_workers=8, drop_last=False)
 
 
 if __name__ == "__main__":
