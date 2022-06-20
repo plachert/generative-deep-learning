@@ -20,6 +20,7 @@ class VisualizeCallback(Callback):
     def __init__(self) -> None:
         super().__init__()
         self.val_batch_outputs = []
+        self.labels = []
 
     def aggregate_and_clean(self):
         aggregated = {}
@@ -48,15 +49,31 @@ class VisualizeCallback(Callback):
         reconstruction_png = fig2png(fig)
         return reconstruction_png
 
+    def make_latent_space_plot(self, aggregated):
+        fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+        latent = aggregated["latent"]
+        ax.scatter(x=latent[:, 0], y=latent[:, 1], c=self.labels)
+        latent_png = fig2png(fig)
+        return latent_png
+
     def on_validation_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
+        _, labels = batch
         self.val_batch_outputs.append(outputs)
+        self.labels.extend(labels)
     
     def on_validation_epoch_end(self, trainer, pl_module):
         aggregated = self.aggregate_and_clean()
         worst_reconstruction_plot = self.make_worst_reconstruction_plot(aggregated)
+        latent_space_plot = self.make_latent_space_plot(aggregated)
         trainer.logger.experiment.add_image(
             "worst_reconstructions",
             worst_reconstruction_plot,
+            trainer.current_epoch,
+            dataformats="HWC",
+        )
+        trainer.logger.experiment.add_image(
+            "latent_space_plot",
+            latent_space_plot,
             trainer.current_epoch,
             dataformats="HWC",
         )
