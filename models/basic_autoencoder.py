@@ -77,8 +77,3 @@ class AutoEncoderSystem(pl.LightningModule):
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), self.learning_rate)
-
-
-
-decoder = Decoder()
-decoder(torch.rand((1, 2)))
